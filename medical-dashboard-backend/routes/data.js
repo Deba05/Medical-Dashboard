@@ -2,16 +2,20 @@ const express = require('express');
 const router = express.Router();
 const Data= require('../models/data');
 
-router.post('/',async(req,res)=>{
-    try{
-        const newData = new Data(req.body);
-        await newData.save();
-        res.status(201).send('data saved');
-    }catch (err){
-        console.log(err);
-        res.status(500).send('Error saving data');
-    }
+
+router.post('/', async (req, res) => {
+  console.log(" Incoming request body:", req.body); 
+
+  try {
+    const newData = new Data(req.body);
+    await newData.save();
+    res.status(201).send('data saved');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Error saving data');
+  }
 });
+
 
 router.get('/',async(req,res)=>{
     try{
