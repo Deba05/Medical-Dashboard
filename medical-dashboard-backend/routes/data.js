@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Data= require('../models/data');
+const { isLoggedIn } = require('../middleware/auth');
 
 
-router.post('/', async (req, res) => {
+router.post('/',isLoggedIn, async (req, res) => {
   console.log(" Incoming request body:", req.body); 
 
   try {
@@ -17,7 +18,7 @@ router.post('/', async (req, res) => {
 });
 
 
-router.get('/',async(req,res)=>{
+router.get('/',isLoggedIn,async(req,res)=>{
     try{
         const recentData = await Data.find().sort({ timestamp:-1}).limit(10);
         res.json(recentData);

@@ -2,22 +2,39 @@ const express = require ('express');
 const mongoose = require ('mongoose');
 const dotenv = require ('dotenv');
 const cors = require('cors');
+
 const Patient = require('./models/patient'); 
 const Data = require('./models/data');
 const multer = require('multer');
 const path = require('path');
+const { isAuthenticated, setSessionToLocals } = require('./middleware/auth');
+const dataRoutes = require('./routes/data');
+const userRoutes = require('./routes/users');
+// const usersRoutes = require('./routes/users');
+//  const {  isLoggedIn  } =  require("./middleware/auth");
+ const { isLoggedIn } = require('./middleware/auth');
 
 
 dotenv.config();
+const session = require('express-session');
+
 const app = express();
 app.use (cors());
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.set('views', './views'); 
 
+
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true })); // for form data
 // app.use(express.json());                         // for JSON data
+app.use(session({
+  secret: 'supersecretkey', // use env variable in production
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(setSessionToLocals); 
+
 
 
 mongoose.connect(process.env.MONGO_URI)
@@ -25,6 +42,9 @@ mongoose.connect(process.env.MONGO_URI)
 .catch(err=>console.error("mongoDB connection error",err));
 
 app.use('/data',require('./routes/data'));
+app.use('/', userRoutes);     // for /signup, /login etc.
+app.use('/data', dataRoutes);
+// app.use('/', usersRoutes);  // mount at root // for /data and related endpoints
 
 
 const storage = multer.diskStorage({
@@ -40,7 +60,7 @@ const storage = multer.diskStorage({
 // Upload middleware
 const upload = multer({ storage: storage });
 
-app.get("/home",async(req,res)=>{
+app.get("/home",isLoggedIn, isAuthenticated,async(req,res)=>{
    try {
     const patients = await Data.distinct("patientName"); // or from Patient.find()
     res.render("home", { patients });
@@ -54,8 +74,8 @@ app.get("/home",async(req,res)=>{
 
 });
 
-app.get('/', async (req, res) => {
-  // Get all unique patient names for dropdown
+app.get('/',isLoggedIn, isAuthenticated, async (req, res) => {
+  
   try{
   const patients = await Data.distinct('patientName');
 
@@ -91,7 +111,7 @@ app.get('/', async (req, res) => {
   
 });
 //SHOW ROUTE 
-app.get('/show', async (req, res) => {
+app.get('/show',isLoggedIn, isAuthenticated, async (req, res) => {
   try {
      const patients = await Patient.find();
     res.render('show', { patients });
@@ -102,7 +122,7 @@ app.get('/show', async (req, res) => {
 });
 //NEW ROUTE
 
-app.get('/new', (req, res) => {
+app.get('/new',isLoggedIn, isAuthenticated, (req, res) => {
   res.render("new.ejs");
 });
 app.post('/new',upload.single('image'),  async (req, res) => {
@@ -124,10 +144,33 @@ app.post('/new',upload.single('image'),  async (req, res) => {
   }
 });
 
+app.get('/login', (req, res) => {
+  res.render('users/login');
+});
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Dummy credentials — replace with DB later
+  if (username === 'admin' && password === 'admin123') {
+    req.session.user = 'admin';
+    res.redirect('/');
+  } else {
+    res.send('Invalid credentials. <a href="/login">Try again</a>');
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) return res.send('Error logging out.');
+    res.redirect('/login');
+  });
+});
+
 // Dynamic patient route
 
 
-app.get('/:patient', async (req, res) => {
+app.get('/:patient',isAuthenticated, async (req, res) => {
   const patientName = req.params.patient; 
 
   try {
