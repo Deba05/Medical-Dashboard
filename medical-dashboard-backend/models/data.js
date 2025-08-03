@@ -17,6 +17,9 @@ const dataSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now
+  },
+  ecg: { 
+    type: [Number], required: false 
   }
 });
 
