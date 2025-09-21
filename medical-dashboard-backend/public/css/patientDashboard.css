@@ -1,0 +1,62 @@
+/* General Page */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f8f9fa;
+}
+
+/* Card Styling */
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Vitals Colors */
+.text-danger { color: #e63946 !important; }
+.text-primary { color: #1d3557 !important; }
+.text-success { color: #2a9d8f !important; }
+
+/* Buttons */
+button.btn-lg {
+  border-radius: 30px;
+  padding: 10px 25px;
+  transition: all 0.2s ease-in-out;
+}
+
+button.btn-lg:hover {
+  background-color: #343a40;
+  transform: scale(1.05);
+}
+
+/* Consent Toggle */
+.form-check-input {
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+.form-check-label {
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+button.btn-sm {
+  border-radius: 20px;
+  padding: 3px 15px;
+}
+
+/* Chart Canvas */
+canvas {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+canvas:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}

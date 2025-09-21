@@ -1,0 +1,119 @@
+/* 🌙 Dark & Light Theme Base */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+
+/* 🌞 Light Mode */
+body.light-mode {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+/* 🌙 Dark Mode */
+body.dark-mode {
+  background-color: #121212;
+  color: #f8f9fa;
+}
+
+/* 🔘 Navbar */
+.navbar {
+  border-radius: 0; /* keep straight edges */
+  margin-bottom: 15px;
+  transition: background 0.3s, color 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+body.dark-mode .navbar {
+  background: #1f1f1f !important;
+  color: #f8f9fa !important;
+}
+
+/* 📊 Dashboard Cards */
+.card {
+  border-radius: 16px;
+  border: none;
+  transition: all 0.3s ease-in-out;
+  background: #fff;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
+
+.dark-mode .card {
+  background-color: #1e1e1e;
+  color: #f8f9fa;
+}
+
+/* Card Icons */
+.card .fs-2 {
+  opacity: 0.85;
+}
+
+/* Highlight Colors */
+.text-purple { color: #6f42c1; }
+.text-info { color: #17a2b8; }
+
+/* 🖼 Patient Image */
+.card-img-top {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  object-fit: cover;
+}
+
+/* 📈 Charts */
+canvas {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px;
+  transition: all 0.3s;
+}
+
+body.dark-mode canvas {
+  background: #1c1c1c;
+}
+
+/* 🖱 Chart Hover */
+canvas:hover {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  transform: scale(1.02);
+}
+
+/* 🌙 Toggle Button */
+#themeToggle {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease-in-out;
+}
+
+body.light-mode #themeToggle {
+  background: #343a40;
+  color: #ffffff;
+}
+
+body.dark-mode #themeToggle {
+  background: #f8f9fa;
+  color: #121212;
+}
+
+#themeToggle:hover {
+  opacity: 0.85;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 20px;
+  }
+}
+
