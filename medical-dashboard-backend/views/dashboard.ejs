@@ -186,29 +186,24 @@
 
     // ✅ AI Insights Function
     async function getAIInsights(patientId) {
-    try {
-      // Call Node.js backend route
-      const res = await fetch(`/ai/predict/${patientId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      });
+  try {
+    const res = await fetch(`/ai/predict/${patientId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    const data = await res.json();
 
-      if (!res.ok) throw new Error("Failed to fetch AI insights");
-
-      const data = await res.json();
-
-      // Show result in alert (can be replaced with a modal)
-      alert(
-        `AI Insights for ${data.patient.name}:\n` +
-        `Status: ${data.prediction.status}\n` +
-        `Insight: ${data.prediction.insight}`
-      );
-
-    } catch (err) {
-      console.error("AI Insights Error:", err);
-      alert("❌ Could not fetch AI insights");
+    if (data.prediction) {
+      alert(`AI Insights:\nStatus: ${data.prediction.status}\nInsight: ${data.prediction.insight}`);
+    } else {
+      alert("No insights available.");
     }
+  } catch (err) {
+    console.error("AI Insights Error:", err);
+    alert("❌ Could not fetch AI insights");
   }
+}
+
 
   // ✅ Send Dummy Data Function (keep as-is)
   async function sendDummyData(patientId) {

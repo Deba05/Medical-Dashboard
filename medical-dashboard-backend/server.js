@@ -506,10 +506,7 @@ app.post("/ai/predict/:patientId", async (req, res) => {
     };
 
     // Call hosted AI service
-    const response = await axios.post(
-      "https://ai-service-rxep.onrender.com/analyze",
-      data
-    );
+    const response = await axios.post(ML_SERVICE_URL, data);
 
     const prediction = response.data;
 
