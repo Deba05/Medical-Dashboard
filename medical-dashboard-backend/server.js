@@ -493,12 +493,12 @@ app.post("/ai/predict/:patientId", async (req, res) => {
   const patientId = req.params.patientId;
 
   try {
-    // ✅ Fetch latest vitals from Data model
-    const latest = await Data.findOne({ patient: patientId }).sort({ timestamp: -1 });
+    const patient = await Patient.findById(patientId);
+    if (!patient) return res.status(404).json({ error: "Patient not found" });
 
-    if (!latest) {
-      return res.status(400).json({ error: "No vitals available" });
-    }
+    // ✅ Look up by patientName instead of patient ObjectId
+    const latest = await Data.findOne({ patientName: patient.name }).sort({ timestamp: -1 });
+    if (!latest) return res.status(400).json({ error: "No vitals available" });
 
     const data = {
       heartRate: latest.heartRate,
@@ -506,17 +506,21 @@ app.post("/ai/predict/:patientId", async (req, res) => {
       weight: latest.weight
     };
 
-    // ✅ Call Flask AI service
-    const response = await axios.post(process.env.ML_SERVICE_URL, data);
+    // Call hosted AI service
+    const response = await axios.post(
+      process.env.ML_SERVICE_URL,
+      data
+    );
 
     const prediction = response.data;
 
-    return res.json({ prediction });
+    res.json({ patient, prediction });
   } catch (err) {
     console.error("AI Insights Error:", err.message);
-    return res.status(500).json({ error: "AI service error" });
+    res.status(500).json({ error: "AI service error" });
   }
 });
+
 
 
 /* 
