@@ -196,13 +196,14 @@
     if (data.prediction) {
       alert(`AI Insights:\nStatus: ${data.prediction.status}\nInsight: ${data.prediction.insight}`);
     } else {
-      alert("No insights available.");
+      alert("⚠️ No insights available. Please record vitals first.");
     }
   } catch (err) {
     console.error("AI Insights Error:", err);
     alert("❌ Could not fetch AI insights");
   }
 }
+
 
 
   // ✅ Send Dummy Data Function (keep as-is)
