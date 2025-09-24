@@ -19,6 +19,8 @@ const { isAuthenticated, setSessionToLocals, isLoggedIn, isDoctor, isAdmin, isPa
 const patientRoutes = require("./routes/patient");
 const dummyRoutes = require("./routes/dummy"); // create file routes/dummy.js
 const methodOverride = require('method-override');
+const axios = require("axios");
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL;
 
 
 
@@ -487,28 +489,36 @@ app.post('/delete/:patientName', async (req, res) => {
     res.status(500).send('Failed to delete patient');
   }
 });
-// const axios = require("axios");
+app.post("/ai/predict/:patientId", async (req, res) => {
+  const patientId = req.params.patientId;
 
-// app.post("/ai/predict/:patientId", async (req, res) => {
-//   const patientId = req.params.patientId;
-//   const patient = await Patient.findById(patientId).populate("vitals");
+  try {
+    const patient = await Patient.findById(patientId).populate("vitals");
+    if (!patient) return res.status(404).send("Patient not found");
 
-//   const latest = patient.vitals[0]; // latest vitals
-//   const data = {
-//     heartRate: latest.heartRate,
-//     spo2: latest.spo2,
-//     weight: latest.weight
-//   };
+    const latest = patient.vitals[0]; // latest vitals
+    if (!latest) return res.status(400).send("No vitals found for this patient");
 
-//   try {
-//     const response = await axios.post("http://localhost:5000/predict", data);
-//     const prediction = response.data;
-//     res.render("aiResult", { patient, prediction });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("AI model error");
-//   }
-// });
+    const data = {
+      heartRate: latest.heartRate,
+      spo2: latest.spo2,
+      weight: latest.weight
+    };
+
+    // Replace localhost with your hosted AI service
+    const response = await axios.post(
+      "https://ai-service-rxep.onrender.com/analyze",
+      data
+    );
+
+    const prediction = response.data;
+    res.render("aiResult", { patient, prediction });
+
+  } catch (error) {
+    console.error("AI Insights Error:", error.message);
+    res.status(500).send("AI service error");
+  }
+});
 
 
 /* 
