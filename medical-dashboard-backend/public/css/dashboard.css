@@ -77,10 +77,10 @@ body.dark-mode canvas {
 }
 
 /* 🖱 Chart Hover */
-canvas:hover {
+/* canvas:hover {
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
   transform: scale(1.02);
-}
+} */
 
 /* 🌙 Toggle Button */
 #themeToggle {

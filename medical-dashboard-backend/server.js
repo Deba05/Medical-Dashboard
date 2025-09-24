@@ -688,6 +688,7 @@ const Doctor = require('./models/doctor'); // ✅ use new Doctor model
 const { isAuthenticated, setSessionToLocals, isLoggedIn } = require('./middleware/auth');
 const patientRoutes = require("./routes/patient");
 const dummyRoutes = require("./routes/dummy"); // create file routes/dummy.js
+const methodOverride = require('method-override');
 
 
 
@@ -695,6 +696,11 @@ const dummyRoutes = require("./routes/dummy"); // create file routes/dummy.js
 
 const dataRoutes = require('./routes/data');
 const userRoutes = require('./routes/users');
+const messageRoutes = require("./routes/messages");
+
+
+
+
 
 dotenv.config();
 const app = express();
@@ -702,14 +708,6 @@ const app = express();
 /* 
    Middleware
 */
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.set('view engine', 'ejs');
-app.set('views', './views');
-app.use(express.static('public'));
-app.use("/patient", patientRoutes);
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'supersecretkey',
@@ -717,18 +715,30 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.set('views', './views');
+app.use(express.static('public'));
+app.use("/patient", patientRoutes);
+console.log("Loaded messageRoutes:", messageRoutes);
+app.use("/messages", messageRoutes);
+
+
 app.use(setSessionToLocals);
 app.use("/simulate", dummyRoutes);
+app.use("/",dummyRoutes);
+app.use(methodOverride('_method'));
 
 
 
 /* 
    MongoDB connection
 */
-mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Atlas connected"))
+  .catch(err => console.error("❌ MongoDB Atlas connection error:", err));
 
 /* 
    Routes
@@ -974,6 +984,8 @@ app.get('/patient/:id', isLoggedIn, isAuthenticated, async (req, res) => {
     // ✅ Use ObjectId for lookup
     const data = await Data.find({ patient: patient._id }).sort({ timestamp: -1 }).limit(10);
     const totalPatients = await Patient.countDocuments();
+     const systolicValues = data.map(d => d.systolicBP || null);
+    const diastolicValues = data.map(d => d.diastolicBP || null);
 
     res.render("dashboard", {
       patient,
@@ -983,6 +995,8 @@ app.get('/patient/:id', isLoggedIn, isAuthenticated, async (req, res) => {
       labels: data.map(d => new Date(d.timestamp).toLocaleTimeString()),
       heartValues: data.map(d => d.heartRate),
       spo2Values: data.map(d => d.spo2),
+      systolicValues,   // ✅ pass to EJS
+      diastolicValues, 
       totalPatients,
       appointmentsToday: 32,
       criticalAlerts: 5,
@@ -1040,21 +1054,63 @@ app.get('/patient/:id', isLoggedIn, isAuthenticated, async (req, res) => {
 //   }
 // });
 // Patient Dashboard by ID
+// app.get('/patient/id/:id', async (req, res) => {
+//   try {
+//     const patient = await Patient.findById(req.params.id);
+//     if (!patient) return res.status(404).send("Patient not found");
+//     let doctor = null;
+//     if (patient.doctor) {
+//       doctor = await Doctor.findById(patient.doctor);
+//     }
+
+//     // ✅ Use ObjectId for lookup
+//     const vitals = await Data.find({ patient: patient._id }).sort({ timestamp: -1 }).limit(10);
+
+//     res.render("patientDashboard", {
+//       patient,
+//       doctor,
+//       vitals,
+//       labels: vitals.map(d => new Date(d.timestamp).toLocaleTimeString()).reverse(),
+//       heartValues: vitals.map(d => d.heartRate).reverse(),
+//       spo2Values: vitals.map(d => d.spo2).reverse(),
+//       weightValues: vitals.map(d => d.weight).reverse(),
+//     });
+//   } catch (err) {
+//     console.error("Error loading patient dashboard:", err);
+//     res.status(500).send("Error loading patient dashboard");
+//   }
+// });
 app.get('/patient/id/:id', async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
     if (!patient) return res.status(404).send("Patient not found");
 
-    // ✅ Use ObjectId for lookup
-    const vitals = await Data.find({ patient: patient._id }).sort({ timestamp: -1 }).limit(10);
+    // Find the doctor who has this patient assigned
+    const doctor = await Doctor.findOne({ patients: patient._id });
+
+    // Get last 10 vitals
+    const vitals = await Data.find({ patient: patient._id })
+      .sort({ timestamp: -1 })
+      .limit(10);
+
+    // Prepare chart values (reverse to show oldest → latest on x-axis)
+    const labels = vitals.map(d => new Date(d.timestamp).toLocaleTimeString()).reverse();
+    const heartValues = vitals.map(d => d.heartRate).reverse();
+    const spo2Values = vitals.map(d => d.spo2).reverse();
+    const systolicValues = vitals.map(d => d.systolicBP || 0).reverse();
+    const diastolicValues = vitals.map(d => d.diastolicBP || 0).reverse();
+    const weightValues = vitals.map(d => d.weight).reverse();
 
     res.render("patientDashboard", {
       patient,
+      doctor,   // ✅ used for messaging section
       vitals,
-      labels: vitals.map(d => new Date(d.timestamp).toLocaleTimeString()).reverse(),
-      heartValues: vitals.map(d => d.heartRate).reverse(),
-      spo2Values: vitals.map(d => d.spo2).reverse(),
-      weightValues: vitals.map(d => d.weight).reverse(),
+      labels,
+      heartValues,
+      spo2Values,
+      systolicValues,
+      diastolicValues,
+      weightValues
     });
   } catch (err) {
     console.error("Error loading patient dashboard:", err);

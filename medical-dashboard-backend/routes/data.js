@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Data= require('../models/data');
 const { isLoggedIn } = require('../middleware/auth');
+const Patient = require("../models/patient");
 
 
 router.post('/', async (req, res) => {
@@ -27,6 +28,8 @@ router.post('/device', async (req, res) => {
 });
 
 
+
+
 router.get('/',async(req,res)=>{
     try{
         const recentData = await Data.find().sort({ timestamp:-1}).limit(10);
@@ -35,5 +38,7 @@ router.get('/',async(req,res)=>{
         res.status(500).send('Erro fetching data');
     }
 });
+
+
 
 module.exports = router;

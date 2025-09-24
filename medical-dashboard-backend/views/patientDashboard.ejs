@@ -20,7 +20,7 @@
     .stat-heart { background: linear-gradient(135deg, #e63946, #ff6b6b); }
     .stat-spo2  { background: linear-gradient(135deg, #007bff, #00b4d8); }
     .stat-weight { background: linear-gradient(135deg, #06d6a0, #1b9aaa); }
-    .stat-age { background: linear-gradient(135deg, #6c63ff, #9a67ea); }
+    .stat-bp { background: linear-gradient(135deg, #6c757d, #495057); }
     .chart-card {
       border-radius: 15px;
       background: #fff;
@@ -36,21 +36,33 @@
   </style>
 </head>
 <body>
+ 
 
   <div class="container mt-4">
     <!-- Header -->
     <div class="dashboard-header">
-      <h2 class="fw-bold">🩺 Patient Dashboard</h2>
-      <button 
-        class="btn btn-primary btn-lg shadow-sm ai-button"
-        onclick="getPatientAIInsights('<%= patient._id %>')">
-        🤖 AI Insights
-      </button>
+      <h2 class="fw-bold">👋 Welcome, <%= patient.name %></h2>
+      <div class="d-flex gap-2">
+        <% if (doctor) { %>
+          <a href="/messages/<%= doctor._id %>" class="btn btn-outline-primary">
+            💬 Message Doctor
+          </a>
+        <% } else { %>
+          <span class="text-muted">No doctor assigned</span>
+        <% } %>
+        <button 
+          class="btn btn-primary shadow-sm ai-button"
+          onclick="getPatientAIInsights('<%= patient._id %>')">
+          🤖 AI Insights
+        </button>
+      </div>
     </div>
 
     <!-- Patient Info -->
     <div class="card mb-4 shadow-sm p-3">
-      <h4 class="mb-0"><%= patient.name %> <span class="text-muted">(Age: <%= patient.age %>)</span></h4>
+      <h4 class="mb-0"><%= patient.name %> 
+        <span class="text-muted">(Age: <%= patient.age %>)</span>
+      </h4>
     </div>
 
     <!-- Vitals Cards -->
@@ -68,15 +80,19 @@
         </div>
       </div>
       <div class="col-md-3">
-        <div class="stat-card stat-weight">
-          <h6>Weight</h6>
-          <h3><%= vitals[0]?.weight || '-' %> kg</h3>
+        <div class="stat-card stat-bp">
+          <h6>Blood Pressure</h6>
+          <% if (vitals[0]) { %>
+            <h3><%= vitals[0].systolicBP %> / <%= vitals[0].diastolicBP %> mmHg</h3>
+          <% } else { %>
+            <h3>- / -</h3>
+          <% } %>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="stat-card stat-age">
-          <h6>Age</h6>
-          <h3><%= patient.age %></h3>
+        <div class="stat-card stat-weight">
+          <h6>Weight</h6>
+          <h3><%= vitals[0]?.weight || '-' %> kg</h3>
         </div>
       </div>
     </div>
@@ -100,12 +116,22 @@
       </div>
     </div>
 
+    <!-- BP Chart Row -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h6 class="fw-bold mb-3">🩺 Blood Pressure Trends</h6>
+          <canvas id="bpChart"></canvas>
+        </div>
+      </div>
+    </div>
+
     <!-- Generate Report -->
-    <div class="text-center mt-4">
+    <!-- <div class="text-center mt-4">
       <form action="/patient/<%= patient.name %>/report" method="POST">
         <button class="btn btn-dark btn-lg shadow-sm">📄 Generate Report</button>
       </form>
-    </div>
+    </div> -->
 
     <!-- Consent Toggle -->
     <div class="text-center mt-4">
@@ -131,8 +157,10 @@
     const labels = <%- JSON.stringify(labels) %>;
     const heartValues = <%- JSON.stringify(heartValues) %>;
     const spo2Values = <%- JSON.stringify(spo2Values) %>;
+    const systolicValues = <%- JSON.stringify(systolicValues) %>;
+    const diastolicValues = <%- JSON.stringify(diastolicValues) %>;
 
-    // Gradient for charts
+    // Gradient helper
     function getGradient(ctx, color1, color2) {
       const gradient = ctx.createLinearGradient(0,0,0,400);
       gradient.addColorStop(0, color1);
@@ -174,6 +202,33 @@
       }
     });
 
+    // Blood Pressure Chart
+    const bpCtx = document.getElementById('bpChart').getContext('2d');
+    new Chart(bpCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Systolic BP',
+            data: systolicValues,
+            borderColor: 'red',
+            backgroundColor: 'rgba(255,0,0,0.1)',
+            fill: true,
+            tension: 0.4
+          },
+          {
+            label: 'Diastolic BP',
+            data: diastolicValues,
+            borderColor: 'blue',
+            backgroundColor: 'rgba(0,0,255,0.1)',
+            fill: true,
+            tension: 0.4
+          }
+        ]
+      }
+    });
+
     // AI Insights
     async function getPatientAIInsights(patientId) {
       try {
@@ -202,3 +257,5 @@
   </script>
 </body>
 </html>
+
+

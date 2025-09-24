@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Messages</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f9fafc; }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .list-group-item {
+      border-radius: 10px;
+      margin-bottom: 10px;
+      padding: 15px;
+    }
+    .list-group-item strong {
+      color: #007bff;
+      font-weight: 600;
+    }
+    .list-group-item small {
+      display: block;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+    textarea {
+      border-radius: 10px;
+      resize: none;
+    }
+    .btn-danger {
+      border-radius: 30px;
+    }
+    .btn-primary {
+      border-radius: 30px;
+      font-weight: 600;
+      padding: 8px 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- ✅ Navbar -->
+  <%- include('partials/navbar') %>
+
+  <div class="container mt-4">
+    <!-- Header -->
+    <div class="message-header">
+      <h3 class="fw-bold">📩 Messages</h3>
+      <span class="text-muted">Conversation</span>
+    </div>
+
+    <!-- Messages List -->
+    <% if (messages.length === 0) { %>
+      <p class="text-muted">No messages yet.</p>
+    <% } else { %>
+      <ul class="list-group list-unstyled">
+        <% messages.forEach(msg => { %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>
+                <%= msg.senderRole === "Doctor" ? "Doctor" : "Patient" %>
+              </strong>:
+              <%= msg.text %><br>
+              <small class="text-muted"><%= new Date(msg.timestamp).toLocaleString() %></small>
+            </div>
+            <% if (String(msg.sender) === String(user.id)) { %>
+              <form action="/messages/<%= msg._id %>?_method=DELETE" method="POST" style="margin:0;">
+                <button class="btn btn-sm btn-danger">🗑 Delete</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <!-- Send New Message -->
+    <div class="card mt-4 shadow-sm p-3">
+      <h5 class="fw-bold mb-3">✉️ Send a Message</h5>
+      <form action="/messages/send" method="POST">
+        <input type="hidden" name="sender" value="<%= user.id %>">
+        <input type="hidden" name="receiver" value="<%= receiverId %>">
+
+        <div class="mb-3">
+          <textarea class="form-control" name="text" rows="3" placeholder="Type your message..." required></textarea>
+        </div>
+        <button class="btn btn-primary">Send</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
+
+

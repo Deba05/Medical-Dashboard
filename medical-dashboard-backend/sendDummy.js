@@ -46,59 +46,64 @@
 // }
 
 // setInterval(sendDummyData, 10000);
-const axios = require("axios");
 
-const API_URL = "http://localhost:3000/data";
-const CRISTIANO_ID = "68ce4e18ddb691efa5d089f7"; // Cristiano’s _id
 
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+//Last Updated Here
 
-async function sendDummyData() {
-  try {
-    let heartRate, spo2, weight;
 
-    // 🎲 Randomly decide normal vs abnormal (20% abnormal chance)
-    const scenario = Math.random();
+// const axios = require("axios");
 
-    if (scenario < 0.15) {
-      // 🔴 Critical scenario
-      heartRate = getRandomInt(160, 190); // dangerously high HR
-      spo2 = getRandomInt(80, 88);        // low SpO₂
-      weight = getRandomInt(50, 55);      // underweight for variety
-      console.log("⚠️ Sending CRITICAL data...");
-    } else if (scenario < 0.35) {
-      // 🟠 Warning scenario
-      heartRate = getRandomInt(110, 130); // elevated HR
-      spo2 = getRandomInt(90, 93);        // borderline SpO₂
-      weight = getRandomInt(85, 95);      // overweight
-      console.log("⚠️ Sending WARNING data...");
-    } else {
-      // 🟢 Normal/stable scenario
-      heartRate = getRandomInt(65, 100);
-      spo2 = getRandomInt(95, 99);
-      weight = getRandomInt(60, 80);
-      console.log("✅ Sending STABLE data...");
-    }
+// const API_URL = "http://localhost:3000/data";
+// const CRISTIANO_ID = "68ce4e18ddb691efa5d089f7"; // Cristiano’s _id
 
-    const dummyData = {
-      patient: CRISTIANO_ID,
-      heartRate,
-      spo2,
-      weight
-    };
+// function getRandomInt(min, max) {
+//   return Math.floor(Math.random() * (max - min + 1)) + min;
+// }
 
-    const response = await axios.post(API_URL, dummyData);
-    console.log("📩 Server response:", response.data);
+// async function sendDummyData() {
+//   try {
+//     let heartRate, spo2, weight;
 
-  } catch (err) {
-    console.error("❌ Error sending data:", err.message);
-  }
-}
+//     // 🎲 Randomly decide normal vs abnormal (20% abnormal chance)
+//     const scenario = Math.random();
 
-// Send every 10 sec
-setInterval(sendDummyData, 10000);
+//     if (scenario < 0.15) {
+//       // 🔴 Critical scenario
+//       heartRate = getRandomInt(160, 190); // dangerously high HR
+//       spo2 = getRandomInt(80, 88);        // low SpO₂
+//       weight = getRandomInt(50, 55);      // underweight for variety
+//       console.log("⚠️ Sending CRITICAL data...");
+//     } else if (scenario < 0.35) {
+//       // 🟠 Warning scenario
+//       heartRate = getRandomInt(110, 130); // elevated HR
+//       spo2 = getRandomInt(90, 93);        // borderline SpO₂
+//       weight = getRandomInt(85, 95);      // overweight
+//       console.log("⚠️ Sending WARNING data...");
+//     } else {
+//       // 🟢 Normal/stable scenario
+//       heartRate = getRandomInt(65, 100);
+//       spo2 = getRandomInt(95, 99);
+//       weight = getRandomInt(60, 80);
+//       console.log("✅ Sending STABLE data...");
+//     }
+
+//     const dummyData = {
+//       patient: CRISTIANO_ID,
+//       heartRate,
+//       spo2,
+//       weight
+//     };
+
+//     const response = await axios.post(API_URL, dummyData);
+//     console.log("📩 Server response:", response.data);
+
+//   } catch (err) {
+//     console.error("❌ Error sending data:", err.message);
+//   }
+// }
+
+
+// setInterval(sendDummyData, 10000);
 
 
 
