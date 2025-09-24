@@ -494,10 +494,10 @@ app.post("/ai/predict/:patientId", async (req, res) => {
 
   try {
     const patient = await Patient.findById(patientId).populate("vitals");
-    if (!patient) return res.status(404).send("Patient not found");
+    if (!patient) return res.status(404).json({ error: "Patient not found" });
 
-    const latest = patient.vitals[0]; // latest vitals
-    if (!latest) return res.status(400).send("No vitals found for this patient");
+    const latest = patient.vitals[0];
+    if (!latest) return res.status(400).json({ error: "No vitals available" });
 
     const data = {
       heartRate: latest.heartRate,
@@ -505,21 +505,20 @@ app.post("/ai/predict/:patientId", async (req, res) => {
       weight: latest.weight
     };
 
-    // Replace localhost with your hosted AI service
+    // Call hosted AI service
     const response = await axios.post(
       "https://ai-service-rxep.onrender.com/analyze",
       data
     );
 
     const prediction = response.data;
-    res.render("aiResult", { patient, prediction });
 
-  } catch (error) {
-    console.error("AI Insights Error:", error.message);
-    res.status(500).send("AI service error");
+    res.json({ patient, prediction });
+  } catch (err) {
+    console.error("AI Insights Error:", err.message);
+    res.status(500).json({ error: "AI service error" });
   }
 });
-
 
 /* 
    Start Server

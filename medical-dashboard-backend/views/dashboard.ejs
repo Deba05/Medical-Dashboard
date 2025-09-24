@@ -186,34 +186,45 @@
 
     // ✅ AI Insights Function
     async function getAIInsights(patientId) {
-      try {
-        const res = await fetch(`/patient/${patientId}/ai-insights`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-        });
-        const data = await res.json();
-        alert(`AI Insights for ${data.patient}:\nStatus: ${data.status}\nInsight: ${data.insight}`);
-      } catch (err) {
-        console.error("AI Insights Error:", err);
-        alert("❌ Could not fetch AI insights");
-      }
-    }
+    try {
+      // Call Node.js backend route
+      const res = await fetch(`/ai/predict/${patientId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
 
-    // ✅ Send Dummy Data Function
-    async function sendDummyData(patientId) {
-      try {
-        const res = await fetch(`/simulate/dummy/${patientId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-        });
-        const result = await res.json();
-        alert(`✅ Dummy data generated for ${result.data.patientName}\nHR: ${result.data.heartRate} bpm\nSpO₂: ${result.data.spo2}%\nBP: ${result.data.systolicBP}/${result.data.diastolicBP} mmHg`);
-        window.location.reload();
-      } catch (err) {
-        console.error("Dummy data error:", err);
-        alert("❌ Could not generate dummy data");
-      }
+      if (!res.ok) throw new Error("Failed to fetch AI insights");
+
+      const data = await res.json();
+
+      // Show result in alert (can be replaced with a modal)
+      alert(
+        `AI Insights for ${data.patient.name}:\n` +
+        `Status: ${data.prediction.status}\n` +
+        `Insight: ${data.prediction.insight}`
+      );
+
+    } catch (err) {
+      console.error("AI Insights Error:", err);
+      alert("❌ Could not fetch AI insights");
     }
+  }
+
+  // ✅ Send Dummy Data Function (keep as-is)
+  async function sendDummyData(patientId) {
+    try {
+      const res = await fetch(`/simulate/dummy/${patientId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const result = await res.json();
+      alert(`✅ Dummy data generated for ${result.data.patientName}\nHR: ${result.data.heartRate} bpm\nSpO₂: ${result.data.spo2}%\nBP: ${result.data.systolicBP}/${result.data.diastolicBP} mmHg`);
+      window.location.reload();
+    } catch (err) {
+      console.error("Dummy data error:", err);
+      alert("❌ Could not generate dummy data");
+    }
+  }
   </script>
 </body>
 </html>
