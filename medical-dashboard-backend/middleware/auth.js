@@ -1,17 +1,12 @@
-// middleware/auth.js
 
-// Middleware to check if user is logged in
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.user === 'admin') {
+
+
+// ✅ Ensure user is logged in
+function isAdmin(req, res, next) {
+  if (req.session.user && req.session.user.role === 'admin') {
     return next();
   }
-  res.redirect('/login');
-}
-
-// Middleware to expose session to EJS views
-function setSessionToLocals(req, res, next) {
-  res.locals.session = req.session;
-  next();
+  return res.status(403).send("Access denied. Admins only.");
 }
 function isAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
@@ -20,6 +15,7 @@ function isAuthenticated(req, res, next) {
   return res.redirect('/login');
 }
 
+// ✅ Restrict to doctors only
 function isDoctor(req, res, next) {
   if (req.session.user && req.session.user.role === 'doctor') {
     return next();
@@ -27,6 +23,7 @@ function isDoctor(req, res, next) {
   return res.status(403).send("Access denied. Doctors only.");
 }
 
+// ✅ Restrict to patients only
 function isPatient(req, res, next) {
   if (req.session.user && req.session.user.role === 'patient') {
     return next();
@@ -34,23 +31,17 @@ function isPatient(req, res, next) {
   return res.status(403).send("Access denied. Patients only.");
 }
 
+// ✅ Pass session data to EJS templates
 function setSessionToLocals(req, res, next) {
-  res.locals.user = req.session.user;
+  res.locals.user = req.session.user || null;
   next();
 }
 
-module.exports = { isAuthenticated, isDoctor, isPatient, setSessionToLocals };
-
-
-
-
 module.exports = {
   isAuthenticated,
+  isDoctor,
+  isAdmin,
+  isPatient,
   setSessionToLocals
 };
-module.exports.isLoggedIn = (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-  next();
-};
+

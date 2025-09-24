@@ -74,36 +74,7 @@ const axios = require("axios");
 const Patient = require("../models/patient");
 const Data = require("../models/data");
 
-// POST: AI Insights
-// router.post("/:id/ai-insights", async (req, res) => {
-//   try {
-//     const patient = await Patient.findById(req.params.id);
-//     const vitals = await Data.find({ patientName: patient.name }).sort({ timestamp: 1 });
 
-//     if (!patient || vitals.length === 0) {
-//       return res.status(404).send("No patient data found");
-//     }
-
-//     const latest = vitals[vitals.length - 1];
-
-//     // Forward to Python ML API
-//     const response = await axios.post("http://127.0.0.1:5000/analyze", {
-//       heartRate: latest.heartRate,
-//       spo2: latest.spo2,
-//       weight: latest.weight || 70, // default weight
-//       timestamp: latest.timestamp
-//     });
-
-//     res.json({
-//       patient: patient.name,
-//       status: response.data.status,
-//       insight: response.data.insight
-//     });
-//   } catch (err) {
-//     console.error("AI Insights Error:", err.message);
-//     res.status(500).send("Error fetching AI insights");
-//   }
-// });
 router.post("/:id/ai-insights", async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id);
