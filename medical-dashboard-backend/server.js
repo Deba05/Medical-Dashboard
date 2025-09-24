@@ -496,9 +496,22 @@ app.post("/ai/predict/:patientId", async (req, res) => {
     const patient = await Patient.findById(patientId);
     if (!patient) return res.status(404).json({ error: "Patient not found" });
 
-    // ✅ Look up by patientName instead of patient ObjectId
-    const latest = await Data.findOne({ patientName: patient.name }).sort({ timestamp: -1 });
-    if (!latest) return res.status(400).json({ error: "No vitals available" });
+    console.log("🔎 Patient found:", patient.name, patient._id);
+
+    // Try with ObjectId first
+    let latest = await Data.findOne({ patient: patient._id }).sort({ timestamp: -1 });
+
+    if (!latest) {
+      console.log("⚠️ No vitals with patient ObjectId, trying patientName…");
+      latest = await Data.findOne({ patientName: patient.name }).sort({ timestamp: -1 });
+    }
+
+    if (!latest) {
+      console.log("❌ Still no vitals found for this patient");
+      return res.status(400).json({ error: "No vitals available" });
+    }
+
+    console.log("✅ Latest vitals found:", latest);
 
     const data = {
       heartRate: latest.heartRate,
@@ -506,12 +519,7 @@ app.post("/ai/predict/:patientId", async (req, res) => {
       weight: latest.weight
     };
 
-    // Call hosted AI service
-    const response = await axios.post(
-      process.env.ML_SERVICE_URL,
-      data
-    );
-
+    const response = await axios.post(process.env.ML_SERVICE_URL, data);
     const prediction = response.data;
 
     res.json({ patient, prediction });
@@ -520,6 +528,7 @@ app.post("/ai/predict/:patientId", async (req, res) => {
     res.status(500).json({ error: "AI service error" });
   }
 });
+
 
 
 
