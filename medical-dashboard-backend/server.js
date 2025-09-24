@@ -491,41 +491,29 @@ app.post('/delete/:patientName', async (req, res) => {
 });
 app.post("/ai/predict/:patientId", async (req, res) => {
   try {
-    const patientId = req.params.patientId;
-
-    // 🔎 Find patient
-    const patient = await Patient.findById(patientId);
+    const patient = await Patient.findById(req.params.patientId);
     if (!patient) return res.status(404).json({ error: "Patient not found" });
 
-    // 🔎 Get latest vitals (try both ObjectId + name, depending on how your Data is saved)
-    let latest = await Data.findOne({ patient: patient._id }).sort({ timestamp: -1 });
+    // Get latest vitals for this patient
+    const latest = await Data.findOne({ patient: patient._id }).sort({ timestamp: -1 });
+    if (!latest) return res.json({ status: "error", insight: "⚠️ No vitals recorded yet" });
 
-    if (!latest) {
-      latest = await Data.findOne({ patientName: patient.name }).sort({ timestamp: -1 });
-    }
-
-    // ❌ Still no vitals
-    if (!latest) {
-      return res.json({ prediction: { status: "none", insight: "⚠️ No insights available. Please record vitals first." } });
-    }
-
-    // ✅ Prepare vitals
     const data = {
-      heartRate: latest.heartRate || 0,
-      spo2: latest.spo2 || 0,
-      weight: latest.weight || 0,
+      heartRate: latest.heartRate,
+      spo2: latest.spo2,
+      weight: latest.weight
     };
 
-    // 🔗 Call AI Flask service
+    // ✅ Call your Flask AI service
     const response = await axios.post(process.env.ML_SERVICE_URL, data);
-    const prediction = response.data;
 
-    return res.json({ prediction });
+    res.json(response.data);
   } catch (err) {
     console.error("AI Insights Error:", err.message);
-    res.status(500).json({ prediction: { status: "error", insight: "AI service error" } });
+    res.json({ status: "error", insight: "AI service error" });
   }
 });
+
 
 
 
