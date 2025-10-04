@@ -510,7 +510,8 @@ app.post("/ai/predict/:patientId", async (req, res) => {
     res.json(response.data);
   } catch (err) {
     console.error("AI Insights Error:", err.message);
-    res.json({ status: "error", insight: "AI service error" });
+    res.json(response.data);
+
   }
 });
 
